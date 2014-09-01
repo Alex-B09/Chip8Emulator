@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Emulator", "Chip8Emulator\Chip8Emulator.vcxproj", "{D4147EFD-A294-49FA-8FF7-46CE4A5DEA84}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Disassembler", "Disassembler\Disassembler.vcxproj", "{AEE48B8A-28A4-42EB-87DF-9BA99D969622}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4147EFD-A294-49FA-8FF7-46CE4A5DEA84}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4147EFD-A294-49FA-8FF7-46CE4A5DEA84}.Debug|Win32.Build.0 = Debug|Win32
+		{D4147EFD-A294-49FA-8FF7-46CE4A5DEA84}.Release|Win32.ActiveCfg = Release|Win32
+		{D4147EFD-A294-49FA-8FF7-46CE4A5DEA84}.Release|Win32.Build.0 = Release|Win32
+		{AEE48B8A-28A4-42EB-87DF-9BA99D969622}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AEE48B8A-28A4-42EB-87DF-9BA99D969622}.Debug|Win32.Build.0 = Debug|Win32
+		{AEE48B8A-28A4-42EB-87DF-9BA99D969622}.Release|Win32.ActiveCfg = Release|Win32
+		{AEE48B8A-28A4-42EB-87DF-9BA99D969622}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
