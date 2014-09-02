@@ -154,12 +154,15 @@ void Chip8State::Emulate0(Chip8State::word opcode)
         case 0xee:
         {
             // return subroutine
+
             m_programCounter = m_stackPointer.back();
             m_stackPointer.pop_back();
             break;
         }
         case 0xe0:
         {
+            // clear screen
+
             ClearScreen();
             break;
         }
@@ -167,6 +170,7 @@ void Chip8State::Emulate0(Chip8State::word opcode)
         default:
         {
             UnimplementedOpcode(opcode);
+            break;
         }
     }
 
@@ -258,7 +262,132 @@ void Chip8State::Emulate7(Chip8State::word opcode)
 
 void Chip8State::Emulate8(Chip8State::word opcode)
 {
-    UnimplementedOpcode(opcode);
+    // vairous set operations
+    // 8XYN --> where N is the type of set
+
+    nibble registerX = (opcode & 0x0f00) >> 8;
+    nibble registerY = (opcode & 0x00f0) >> 4;
+
+    
+
+    nibble indicatorSwitch = opcode & 0x000f;
+
+    switch (indicatorSwitch)
+    {
+        case 0x0:
+        {
+            m_registers[registerX] = m_registers[registerY];
+            break;
+        }
+
+        case 0x1:
+        {
+            //  Vx = Vx OR Vy
+
+            m_registers[registerX] |= m_registers[registerY];
+            break; 
+        }
+
+        case 0x2:
+        {
+            //  Vx = Vx AND Vy
+
+            m_registers[registerX] &= m_registers[registerY];
+            break;
+        }
+
+        case 0x3:
+        {
+            // Vx = Vx XOR Vy
+            m_registers[registerX] ^= m_registers[registerY];
+            break;
+        }
+
+        case 0x4:
+        {
+            // add Vy to Vx
+            // Vf to 1 when carry
+            word valueX = m_registers[registerX];
+            word valueY = m_registers[registerY];
+            
+
+            // TODO
+            m_registers[0xf] = valueX > valueY;
+            unsigned int total = valueX + valueY;
+            word totalWithCarry = valueX + valueY;
+
+            // so if there was a carry
+            m_registers[0xf] = total != totalWithCarry;
+
+            m_registers[registerX] = valueX + valueY;
+
+            break;
+        }
+
+        case 0x5:
+        {
+            // substract Vy from Vx
+            // Vf to 0 if borrow
+
+            word valueX = m_registers[registerX];
+            word valueY = m_registers[registerY];
+
+            m_registers[0xf] = valueX > valueY;
+
+            m_registers[registerX] = valueX - valueY;
+            break;
+        }
+
+        case 0x6:
+        {
+            // Shift Vx right by one
+            // Set Vf to Vx most significant Bit value
+
+            word currentXValue = m_registers[registerX];
+
+            // The next line will get the value of the least significant bit
+            // 0 if it is 0, 1 otherwize
+            bool leastSignificantBit = currentXValue & 0x0001;
+            m_registers[0xf] = leastSignificantBit;
+            m_registers[registerX] >>= 1;
+            break;
+        }
+
+        case 0x7:
+        {
+            // Vx = Vy - Vx
+            // Vf to 0 if borrow
+
+            word valueX = m_registers[registerX];
+            word valueY = m_registers[registerY];
+
+            m_registers[0xf] = valueX > valueY;
+
+            m_registers[registerX] = valueY - valueX;
+            break;
+        }
+
+        case 0xe:
+        {
+            // Shift Vx left by one
+            // Set Vf to Vx most significant Bit value
+
+            word currentXValue = m_registers[registerX];
+
+            // The next line will get the value of the most significant bit
+            // 0 if it is 0, 1 otherwize
+            bool mostSignificantBit = (currentXValue & 0x8000) != 0;
+            m_registers[0xf] = mostSignificantBit;
+            m_registers[registerX] <<= 1;
+            break;
+        }
+
+        default:
+        {
+            UnimplementedOpcode(opcode);
+            break;
+        }
+    }
 }
 
 void Chip8State::Emulate9(Chip8State::word opcode)
@@ -314,7 +443,28 @@ void Chip8State::EmulateD(Chip8State::word opcode)
 
 void Chip8State::EmulateE(Chip8State::word opcode)
 {
-    UnimplementedOpcode(opcode);
+    bool skipNextLine = false;
+
+    nibble registerX = (opcode & 0x0f00) >> 8;
+    byte lastByte = opcode & 0x00ff;
+
+    if (lastByte == 0x9E)
+    {
+        UnimplementedOpcode(opcode);
+    }
+    else if (lastByte == 0x0A)
+    {
+        UnimplementedOpcode(opcode);
+    }
+    else
+    {
+        UnimplementedOpcode(opcode);
+    }
+
+    if (skipNextLine)
+    {
+        m_programCounter += 2;
+    }
 }
 
 void Chip8State::EmulateF(Chip8State::word opcode)

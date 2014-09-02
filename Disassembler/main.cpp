@@ -422,7 +422,7 @@ Data ReadFile(string fileName)
 
 int main()
 {
-    auto data = ReadFile("C:\\Programming\\projects\\Chip8Emulator\\Chip8RomPack\\Chip-8 Programs\\Fishie.ch8");
+    auto data = ReadFile("C:\\Programming\\projects\\Chip8Emulator\\Chip8RomPack\\Chip-8 Programs\\Random Number Test [Matthew Mikolay, 2010].ch8");
     cout << data.nbOfElement << endl;
 
     cout << std::hex << std::setfill('0') << std::setw(4);
