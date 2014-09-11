@@ -7,6 +7,6 @@ At this moment, not all upcodes are implemented but most of them are
 
 next step :
 
-test project
+    test project
 
-add SFML support
+    add SFML support
