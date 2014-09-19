@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <SFML/Graphics.hpp>
 
 Chip8State::Chip8State()
     :m_distributor(0x00, 0xff)
@@ -138,9 +139,18 @@ void Chip8State::UnimplementedOpcode(Chip8State::word opcode)
     std::cout << "Not implemented " << opcode;
 }
 
+void Chip8State::UnimplementedFunction(std::string name)
+{
+    std::cout << "Function not implemented " << name;
+}
+
 Chip8State::word Chip8State::GetNextOpcode() const
 {
-    word address = m_gpMemory[m_programCounter] << 8;
+    // get the first part of the opcode at address pc and puch it 8 bits
+    word address = m_gpMemory[m_programCounter];
+    address <<= 8;
+
+    // get the rest of the opcode
     address += m_gpMemory[m_programCounter + 1];
 
     return address;
@@ -431,9 +441,8 @@ void Chip8State::EmulateC(Chip8State::word opcode)
     byte value = opcode & 0x00ff;
 
     byte random = static_cast<byte>(m_distributor(m_randomEngine));
-    value = value & random;
 
-    m_registers[registerX] = value;
+    m_registers[registerX] = value & random;
 }
 
 void Chip8State::EmulateD(Chip8State::word opcode)
@@ -448,18 +457,26 @@ void Chip8State::EmulateE(Chip8State::word opcode)
     nibble registerX = (opcode & 0x0f00) >> 8;
     byte lastByte = opcode & 0x00ff;
 
+    auto key = GetKey(m_registers[registerX]);
+    bool keyPressed = sf::Keyboard::isKeyPressed(key);
+
     if (lastByte == 0x9E)
     {
-        UnimplementedOpcode(opcode);
+        // Skip next line if Vx is pressed
+
+        skipNextLine = keyPressed;
     }
     else if (lastByte == 0x0A)
     {
-        UnimplementedOpcode(opcode);
+        // Skip next line if Vx is not pressed
+
+        skipNextLine != keyPressed;
     }
     else
     {
         UnimplementedOpcode(opcode);
     }
+
 
     if (skipNextLine)
     {
@@ -469,10 +486,129 @@ void Chip8State::EmulateE(Chip8State::word opcode)
 
 void Chip8State::EmulateF(Chip8State::word opcode)
 {
+    // FXNN -- where NN is the operation
+
+    nibble registerX = (opcode & 0x0f00) >> 8;
+    byte operation = opcode & 0x00ff;
+
+    switch (operation)
+    {
+        case 0x07:
+        {
+            // set Vx to delay timer value
+
+            m_registers[registerX] = m_delayTimer;
+            break;
+        }
+        case 0x0a:
+        {
+            // wait for a key, then store in Vx
+
+            UnimplementedOpcode(opcode);
+            break;
+        }
+        case 0x15:
+        {
+            // set delay timer to Vx value
+
+            m_delayTimer = m_registers[registerX];
+            break;
+        }
+        case 0x18:
+        {
+            // set sound timer to Vx value
+
+            m_soundTimer = m_registers[registerX];
+            break;
+        }
+        case 0x1e:
+        {
+            // Add Vx to I
+
+            m_gpMemory[m_addressRegisterI] += m_registers[registerX];
+            break;
+        }
+        case 0x29:
+        {
+            // set I to location of sprite in Vx
+
+            UnimplementedOpcode(opcode);
+            break;
+        }
+        case 0x33:
+        {
+            // Lots of things.... see wiki...
+
+            UnimplementedOpcode(opcode);
+            break;
+        }
+        case 0x55:
+        {
+            // store V0 to Vx in memory starting at address I
+
+            auto lenght = registerX * sizeof(byte);
+            std::memcpy(m_gpMemory + m_addressRegisterI, m_registers, lenght);
+            break;
+        }
+        case 0x65:
+        {
+            // Fills V0 to Vx whit values from memory starting at address I
+
+            auto lenght = registerX * sizeof(byte);
+            std::memcpy(m_registers, m_gpMemory + m_addressRegisterI, lenght);
+            break;
+        }
+        default:
+        {
+            // something went wrong...
+            UnimplementedOpcode(opcode);
+        }
+    }
+
     UnimplementedOpcode(opcode);
 }
 
 void Chip8State::ClearScreen()
 {
+    UnimplementedFunction("Cls");
+}
 
+sf::Keyboard::Key Chip8State::GetKey(byte toConvert) const
+{
+    /* the chip8 keyboard mapping is like this :
+    
+    1 2 3 C
+    4 5 6 D
+    7 8 9 E
+    A 0 B F
+    
+    As a design decision, this will be "reverse"
+    mapped to the numpad
+
+    the letters (A to F) will be mapped to the actual
+    letters
+    */
+
+    // the keyboard have 16 keys 0 to f (included)
+    sf::Keyboard::Key keyMapping[16] =
+    {
+        sf::Keyboard::Numpad0,
+        sf::Keyboard::Numpad7,
+        sf::Keyboard::Numpad8,
+        sf::Keyboard::Numpad9,
+        sf::Keyboard::Numpad4,
+        sf::Keyboard::Numpad5,
+        sf::Keyboard::Numpad6,
+        sf::Keyboard::Numpad1,
+        sf::Keyboard::Numpad2,
+        sf::Keyboard::Numpad3,
+        sf::Keyboard::A,
+        sf::Keyboard::B,
+        sf::Keyboard::C,
+        sf::Keyboard::D,
+        sf::Keyboard::E,
+        sf::Keyboard::F,
+    };
+
+    return keyMapping[toConvert];
 }

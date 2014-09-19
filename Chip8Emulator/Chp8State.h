@@ -4,7 +4,10 @@
 #include <cstdint>
 #include <memory>
 #include <random>
+#include <string>
 #include <vector>
+
+#include <SFML\Window.hpp>
 
 class Chip8State
 {
@@ -38,6 +41,8 @@ public:
 
 private:
     void UnimplementedOpcode(word opcode);
+    void UnimplementedFunction(std::string name);
+
     word GetNextOpcode() const;
 
     // y aller avec std::function et vecteur...plus simple
@@ -62,6 +67,7 @@ private:
 
     // helper
     void ClearScreen();
+    sf::Keyboard::Key GetKey(byte toConvert) const;
 };
 
 
